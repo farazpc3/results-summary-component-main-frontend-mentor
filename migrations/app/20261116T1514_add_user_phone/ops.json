@@ -1,0 +1,597 @@
+[
+  {
+    "id": "dropDefault.User.id",
+    "label": "Drop default on \"User\".\"id\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "id",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"id\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop default on \"id\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"id\" DROP DEFAULT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"id\" has no default",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"column_default\" IS NULL)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.CategoryScore",
+    "label": "Create table \"CategoryScore\"",
+    "summary": "Creates table \"CategoryScore\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "CategoryScore"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"CategoryScore\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"CategoryScore\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"CategoryScore\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"CategoryScore\"",
+        "sql": "CREATE TABLE \"public\".\"CategoryScore\" (\n  \"categoryName\" text NOT NULL,\n  \"iconName\" text,\n  \"id\" text NOT NULL,\n  \"maxScore\" int4 DEFAULT 100 NOT NULL,\n  \"score\" int4 NOT NULL,\n  \"testAttemptId\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"CategoryScore\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"CategoryScore\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"CategoryScore\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.TestAttempt",
+    "label": "Create table \"TestAttempt\"",
+    "summary": "Creates table \"TestAttempt\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "TestAttempt"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"TestAttempt\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"TestAttempt\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"TestAttempt\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"TestAttempt\"",
+        "sql": "CREATE TABLE \"public\".\"TestAttempt\" (\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"overallScore\" int4 NOT NULL,\n  \"percentile\" int4 NOT NULL,\n  \"statusLabel\" text NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"TestAttempt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"TestAttempt\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"TestAttempt\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "column.public.User.createdAt",
+    "label": "Add column \"createdAt\" to \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "createdAt",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"createdAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "createdAt"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"createdAt\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"createdAt\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"createdAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "createdAt"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"createdAt\" on \"User\""
+        }
+      },
+      {
+        "description": "verify column \"createdAt\" has type \"timestamp(3) with time zone\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "createdAt",
+          "timestamp(3) with time zone"
+        ]
+      },
+      {
+        "description": "verify column \"createdAt\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "createdAt",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterType.User.id",
+    "label": "Alter type of \"User\".\"id\" to text",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "id",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"id\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"id\" to text",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"id\" TYPE text USING \"id\"::text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"id\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id",
+          "text"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "column.User.updatedAt",
+    "label": "Add column updatedAt to User",
+    "summary": "Adds column updatedAt to table User",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "User"
+      }
+    },
+    "operationClass": "additive",
+    "precheck": [
+      {
+        "description": "ensure column \"updatedAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"updatedAt\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"updatedAt\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"updatedAt\" timestamptz(3) DEFAULT ('epoch') NOT NULL"
+      },
+      {
+        "description": "drop temporary default from column \"updatedAt\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"updatedAt\" DROP DEFAULT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"updatedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"updatedAt\" on \"User\""
+        }
+      },
+      {
+        "description": "verify column \"updatedAt\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt",
+          "NO"
+        ]
+      },
+      {
+        "description": "verify column \"updatedAt\" has no default after temporary default removal",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"column_default\" IS NOT NULL)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt"
+        ]
+      },
+      {
+        "description": "verify column \"updatedAt\" has type \"timestamp(3) with time zone\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt",
+          "timestamp(3) with time zone"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.CategoryScore.CategoryScore_testAttemptId_categoryName_key",
+    "label": "Add unique constraint on \"CategoryScore\" (testAttemptId, categoryName)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "CategoryScore_testAttemptId_categoryName_key",
+        "table": "CategoryScore"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"CategoryScore_testAttemptId_categoryName_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "CategoryScore_testAttemptId_categoryName_key",
+          "public",
+          "\"public\".\"CategoryScore\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"CategoryScore_testAttemptId_categoryName_key\" on \"CategoryScore\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"CategoryScore_testAttemptId_categoryName_key\"",
+        "sql": "ALTER TABLE \"public\".\"CategoryScore\" ADD CONSTRAINT \"CategoryScore_testAttemptId_categoryName_key\" UNIQUE (\"testAttemptId\", \"categoryName\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"CategoryScore_testAttemptId_categoryName_key\" exists on (testAttemptId, categoryName)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "CategoryScore_testAttemptId_categoryName_key",
+          "public",
+          "\"public\".\"CategoryScore\"",
+          "u",
+          "[\"testAttemptId\",\"categoryName\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.CategoryScore.CategoryScore_testAttemptId_idx_aa63b252",
+    "label": "Create index \"CategoryScore_testAttemptId_idx_aa63b252\" on \"CategoryScore\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "CategoryScore_testAttemptId_idx_aa63b252",
+        "table": "CategoryScore"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"CategoryScore_testAttemptId_idx_aa63b252\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"CategoryScore_testAttemptId_idx_aa63b252\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"CategoryScore_testAttemptId_idx_aa63b252\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"CategoryScore_testAttemptId_idx_aa63b252\"",
+        "sql": "CREATE INDEX \"CategoryScore_testAttemptId_idx_aa63b252\" ON \"public\".\"CategoryScore\" (\"testAttemptId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"CategoryScore_testAttemptId_idx_aa63b252\" exists on \"CategoryScore\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"CategoryScore_testAttemptId_idx_aa63b252\"",
+          "i",
+          "I",
+          "\"public\".\"CategoryScore\"",
+          "btree",
+          "[\"testAttemptId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.TestAttempt.TestAttempt_userId_idx_a489d58a",
+    "label": "Create index \"TestAttempt_userId_idx_a489d58a\" on \"TestAttempt\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "TestAttempt_userId_idx_a489d58a",
+        "table": "TestAttempt"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"TestAttempt_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"TestAttempt_userId_idx_a489d58a\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"TestAttempt_userId_idx_a489d58a\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"TestAttempt_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"TestAttempt_userId_idx_a489d58a\" ON \"public\".\"TestAttempt\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"TestAttempt_userId_idx_a489d58a\" exists on \"TestAttempt\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"TestAttempt_userId_idx_a489d58a\"",
+          "i",
+          "I",
+          "\"public\".\"TestAttempt\"",
+          "btree",
+          "[\"userId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.CategoryScore.CategoryScore_testAttemptId_fkey",
+    "label": "Add foreign key \"CategoryScore_testAttemptId_fkey\" on \"CategoryScore\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "CategoryScore_testAttemptId_fkey",
+        "table": "CategoryScore"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"CategoryScore_testAttemptId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "CategoryScore_testAttemptId_fkey",
+          "public",
+          "\"public\".\"CategoryScore\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"CategoryScore_testAttemptId_fkey\" on \"CategoryScore\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"CategoryScore_testAttemptId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"CategoryScore\"\nADD CONSTRAINT \"CategoryScore_testAttemptId_fkey\"\nFOREIGN KEY (\"testAttemptId\")\nREFERENCES \"public\".\"TestAttempt\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"CategoryScore_testAttemptId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "CategoryScore_testAttemptId_fkey",
+          "public",
+          "\"public\".\"CategoryScore\"",
+          "f",
+          "[\"testAttemptId\"]",
+          "\"public\".\"TestAttempt\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.TestAttempt.TestAttempt_userId_fkey",
+    "label": "Add foreign key \"TestAttempt_userId_fkey\" on \"TestAttempt\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "TestAttempt_userId_fkey",
+        "table": "TestAttempt"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"TestAttempt_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "TestAttempt_userId_fkey",
+          "public",
+          "\"public\".\"TestAttempt\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"TestAttempt_userId_fkey\" on \"TestAttempt\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"TestAttempt_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"TestAttempt\"\nADD CONSTRAINT \"TestAttempt_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"TestAttempt_userId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "TestAttempt_userId_fkey",
+          "public",
+          "\"public\".\"TestAttempt\"",
+          "f",
+          "[\"userId\"]",
+          "\"public\".\"User\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  }
+]

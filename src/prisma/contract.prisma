@@ -1,0 +1,37 @@
+// use prisma-8
+
+model User {
+  id        String   @id @onCreate(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @onCreate(now()) @onUpdate(now())
+
+  attempts  TestAttempt[]
+}
+
+model TestAttempt {
+  id           String   @id @onCreate(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+
+  overallScore Int
+  percentile   Int
+  statusLabel  String
+
+  createdAt    DateTime @default(now())
+  categoryScores CategoryScore[]
+}
+
+model CategoryScore {
+  id            String      @id @onCreate(uuid())
+  testAttemptId String
+  testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
+
+  categoryName  String
+  score         Int
+  maxScore      Int         @default(100)
+  iconName      String?
+
+  @@unique([testAttemptId, categoryName])
+}
