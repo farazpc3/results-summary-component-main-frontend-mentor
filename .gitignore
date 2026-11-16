@@ -1,8 +1,8 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# ==========================
+# Dependencies
+# ==========================
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -10,38 +10,62 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# ==========================
+# Testing
+# ==========================
 /coverage
 
-# next.js
+# ==========================
+# Next.js & Production
+# ==========================
 /.next/
 /out/
-
-# production
 /build
+/dist/
 
-# misc
+# ==========================
+# Environment Variables
+# ==========================
+# Ignore all local env files...
+.env*
+# ...but DO commit the example template so others know what variables are needed
+!.env.example
+
+# ==========================
+# Prisma (Prisma 8 specific)
+# ==========================
+# The generated client shouldn't be committed
+node_modules/.prisma/
+node_modules/@prisma/
+
+# ==========================
+# AI Assistants & Editor Configs
+# ==========================
+# These are typically personal to your machine/tools
+.claude/
+.cursor/
+.devin/
+.agents/
+
+# ==========================
+# Vercel
+# ==========================
+.vercel
+
+# ==========================
+# Misc & Debug
+# ==========================
 .DS_Store
+Thumbs.db
 *.pem
-
-# debug
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
+# ==========================
+# TypeScript
+# ==========================
 *.tsbuildinfo
 next-env.d.ts
-
-.vercel
-.env*
-node_modules/
-dist/
-.env
